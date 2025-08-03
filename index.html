@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Character Name Generator AI</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #0d0d0d;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .screen {
+      display: none;
+      width: 100%;
+      max-width: 600px;
+      padding: 20px;
+      margin-top: 40px;
+      text-align: center;
+    }
+
+    .active {
+      display: block;
+    }
+
+    select, input, button {
+      margin: 10px;
+      padding: 10px;
+      font-size: 16px;
+    }
+
+    .currency {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      font-weight: bold;
+    }
+
+    .cloud {
+      position: absolute;
+      top: 10px;
+      left: 20px;
+      cursor: pointer;
+    }
+
+    .name {
+      margin: 5px 0;
+    }
+
+    .name-art {
+      font-size: 28px;
+      margin: 15px 0;
+      font-family: fantasy;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .btn {
+      background-color: #222;
+      color: white;
+      border: 1px solid white;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background-color: #444;
+    }
+  </style>
+</head>
+<body>
+
+<div class="currency" id="currencyDisplay">💰 1000 USD</div>
+<div class="cloud" onclick="showGiveMeBox()">☁️</div>
+
+<!-- Screen 1: Language Select -->
+<div class="screen active" id="screen1">
+  <h1>Character Name Generator AI</h1>
+  <p>Select language for name display:</p>
+  <select id="languageSelect">
+    <option value="en">English</option>
+    <option value="jp">Japanese Romaji</option>
+  </select>
+  <br>
+  <button class="btn" onclick="goToGenerator()">Continue</button>
+</div>
+
+<!-- Screen 2: Name Generator -->
+<div class="screen" id="screen2">
+  <h2>Generate a Character Name</h2>
+  <label>Country:
+    <select id="countrySelect">
+      <option>England</option>
+      <option>Korea</option>
+      <option>Japan</option>
+      <option>Russia</option>
+      <option>China</option>
+      <option>Germany</option>
+      <option>Brazil</option>
+      <option>India</option>
+      <option>Africa</option>
+    </select>
+  </label>
+  <br>
+  <label>Name Length:
+    <select id="lengthSelect">
+      <option>Short</option>
+      <option>Medium</option>
+      <option>Long</option>
+    </select>
+  </label>
+  <br>
+  <input type="text" id="descInput" placeholder="Describe your character" size="40" />
+  <br>
+  <button class="btn" onclick="generateNames()">Generate</button>
+  <div id="nameResults"></div>
+</div>
+
+<!-- Screen 3: Name Art -->
+<div class="screen" id="screen3">
+  <h2>Choose Name Style</h2>
+  <div id="styledName"></div>
+  <button class="btn" onclick="generateStyles()">Generate Style (costs 200)</button>
+  <div id="nameStyles"></div>
+</div>
+
+<!-- Hidden GiveMe box -->
+<div id="giveMeBox" class="hidden">
+  <input id="giveInput" placeholder="give me 1000" onkeydown="handleGiveMe(event)">
+</div>
+
+<script>
+  let currentCurrency = 1000;
+  let selectedCurrency = 'USD';
+  let selectedName = '';
+
+  function goToGenerator() {
+    const lang = document.getElementById("languageSelect").value;
+    selectedCurrency = (lang === "jp") ? "JPY" : "USD";
+    if (lang === "ru") selectedCurrency = "RUB";
+    updateCurrencyDisplay();
+    document.getElementById("screen1").classList.remove("active");
+    document.getElementById("screen2").classList.add("active");
+  }
+
+  function updateCurrencyDisplay() {
+    document.getElementById("currencyDisplay").innerText = `💰 ${currentCurrency} ${selectedCurrency}`;
+  }
+
+  function generateNames() {
+    const results = document.getElementById("nameResults");
+    results.innerHTML = '';
+    const names = [];
+    for (let i = 0; i < 3; i++) {
+      const first = randomNamePart();
+      const last = randomNamePart();
+      const full = `${first} ${last}`;
+      const div = document.createElement("div");
+      div.className = "name";
+      div.innerHTML = `${full} <button class="btn" onclick="selectName('${full}')">Select</button>`;
+      results.appendChild(div);
+    }
+  }
+
+  function randomNamePart() {
+    const syllables = ["Ka", "To", "Shi", "Ra", "Mi", "Yu", "No", "Gi", "Re", "Sa", "Lu", "Zen", "Kin"];
+    return syllables[Math.floor(Math.random() * syllables.length)] + syllables[Math.floor(Math.random() * syllables.length)];
+  }
+
+  function selectName(name) {
+    selectedName = name;
+    document.getElementById("screen2").classList.remove("active");
+    document.getElementById("screen3").classList.add("active");
+    document.getElementById("styledName").innerText = `You selected: ${name}`;
+    generateStyles();
+  }
+
+  function generateStyles() {
+    if (currentCurrency < 200) {
+      alert("Not enough currency!");
+      return;
+    }
+    currentCurrency -= 200;
+    updateCurrencyDisplay();
+    const styles = document.getElementById("nameStyles");
+    styles.innerHTML = '';
+    for (let i = 0; i < 3; i++) {
+      const styled = document.createElement("div");
+      styled.className = "name-art";
+      styled.innerText = styleName(selectedName);
+      styles.appendChild(styled);
+    }
+  }
+
+  function styleName(name) {
+    const decorations = ["★", "✦", "❖", "⛩", "⚔", "☯"];
+    const deco = decorations[Math.floor(Math.random() * decorations.length)];
+    return `${deco} ${name} ${deco}`;
+  }
+
+  function showGiveMeBox() {
+    document.getElementById("giveMeBox").classList.toggle("hidden");
+  }
+
+  function handleGiveMe(e) {
+    if (e.key === "Enter") {
+      const value = document.getElementById("giveInput").value.trim().toLowerCase();
+      if (value.startsWith("give me")) {
+        const amount = parseInt(value.replace("give me", "").trim());
+        if (!isNaN(amount)) {
+          currentCurrency += amount;
+          updateCurrencyDisplay();
+          alert(`You received ${amount} ${selectedCurrency}!`);
+        }
+      }
+      document.getElementById("giveInput").value = '';
+      document.getElementById("giveMeBox").classList.add("hidden");
+    }
+  }
+</script>
+</body>
+</html>
